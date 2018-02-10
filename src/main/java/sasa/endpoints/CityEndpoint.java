@@ -6,7 +6,8 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-import sasa.repositories.CityRepository;
+import sasa.persistence.repositories.CityRepository;
+
 
 @Endpoint
 public class CityEndpoint {
@@ -23,7 +24,14 @@ public class CityEndpoint {
     @ResponsePayload
     public GetCityResponse getCity(@RequestPayload GetCityRequest request) {
         GetCityResponse response = new GetCityResponse();
-        response.setCity(cityRepository.findCity(request.getName()));
+        sasa.persistence.entities.City city = cityRepository.findByName(request.getName());
+
+        City answerCity = new City();
+        answerCity.setName(city.getName());
+        answerCity.setCountry(city.getCountry());
+        answerCity.setPopulation(city.getPopulation());
+        answerCity.setTimeZoneUTC(city.getTimeZone());
+        response.setCity(answerCity);
 
         return response;
     }
@@ -32,7 +40,21 @@ public class CityEndpoint {
     @ResponsePayload
     public SetCityResponse setCountry(@RequestPayload SetCityRequest request) {
         SetCityResponse response = new SetCityResponse();
-        response.setCity(cityRepository.addCity(request.getCity()));
+
+        City city = request.getCity();
+
+        sasa.persistence.entities.City savedCity = cityRepository.findByName(city.getName());
+        if(savedCity==null) {
+            savedCity = new sasa.persistence.entities.City();
+            savedCity.setName(city.getName());
+            savedCity.setCountry(city.getCountry());
+            savedCity.setPopulation(city.getPopulation());
+            savedCity.setTimeZone(city.getTimeZoneUTC());
+        }
+        cityRepository.save(savedCity);
+        response.setCity(city);
+
+        response.setCity(request.getCity());
         return response;
     }
 }

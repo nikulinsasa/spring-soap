@@ -44,4 +44,5 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         return new SimpleXsdSchema(new ClassPathResource("countries.xsd"));
     }
 
+
 }
